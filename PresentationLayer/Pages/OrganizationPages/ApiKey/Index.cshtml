@@ -1,0 +1,25 @@
+﻿@page
+@model PresentationLayer.Pages.OrganizationPages.ApiKey.IndexModel
+@{
+}
+<div class="container mt-5">
+    <h2 class="mb-4">API Key Management</h2>
+
+    <div class="card p-4 mb-4 shadow-sm">
+        <form method="post">
+            <input type="hidden" asp-for="OrganizationId" />
+            <button type="submit" asp-page-handler="Generate" class="btn btn-primary">
+                Generate New API Key
+            </button>
+        </form>
+    </div>
+
+    @if (Model.NewApiKey != null)
+    {
+        <div class="alert alert-success shadow-sm">
+            <h5 class="mb-2">New API Key</h5>
+            <p class="mb-1">Copy it now, it will not be shown again:</p>
+            <pre class="bg-light p-2 border rounded">@Model.NewApiKey</pre>
+        </div>
+    }
+</div>

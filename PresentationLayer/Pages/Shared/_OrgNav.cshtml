@@ -1,0 +1,67 @@
+﻿<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
+    <div class="container-fluid">
+
+        <a class="navbar-brand fw-semibold"
+           asp-page="/OrganizationPages/Dashboard/Index">
+            Org Portal
+        </a>
+
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#orgNavbar"
+                aria-controls="orgNavbar"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="orgNavbar">
+
+            <ul class="navbar-nav me-auto gap-lg-1">
+                <li class="nav-item">
+                    <a class="nav-link"
+                       asp-page="/OrganizationPages/Dashboard/Index">
+                        Dashboard
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link"
+                       asp-page="/OrganizationPages/Clients/Index">
+                        Clients
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link"
+                       asp-page="/OrganizationPages/ApiKey/Index">
+                        API Key
+                    </a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+                <li class="nav-item">
+                    <a class="nav-link"
+                       asp-page="/Account/Manage">
+                        Account
+                    </a>
+                </li>
+
+                <li class="nav-item ms-lg-2">
+                    <form method="post"
+                          asp-area="Identity"
+                          asp-page="/Account/Logout"
+                          onsubmit="return confirm('Log out of your account?');">
+                        <button type="submit"
+                                class="btn btn-sm btn-outline-light">
+                            Logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+</nav>

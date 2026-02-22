@@ -1,0 +1,22 @@
+﻿@page
+@model PresentationLayer.Pages.OrganizationPages.CreateModel
+@{
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="Input.Name" class="form-control" placeholder="Organization Name" />
+        <label asp-for="Input.Name">Organization Name</label>
+        <span asp-validation-for="Input.Name" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Organization</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

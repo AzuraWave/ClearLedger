@@ -1,0 +1,211 @@
+﻿@page
+@using DomainLayer.Enums
+@model PresentationLayer.Pages.OrganizationPages.Clients.DetailsModel
+
+<div class="container mt-4">
+
+    @if (Model.Client == null)
+    {
+        <div class="alert alert-warning">
+            Client not found.
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">@Model.Client.Name</h4>
+                    <span class="badge @(Model.Client.Status == DomainLayer.Enums.ClientStatus.Active ? "bg-success" : "bg-secondary")">
+                        @Model.Client.Status
+                    </span>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div><strong>Email:</strong> @Model.Client.BillingEmail</div>
+                        <div><strong>Phone:</strong> @Model.Client.PhoneNumber</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div><strong>Address:</strong> @Model.Client.Address</div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div>
+                            <strong>Balance:</strong>
+                            <span class="fw-semibold @(Model.Client.Balance < 0 ? "text-danger" : (Model.Client.Balance > 0 ? "text-success" : "text-muted"))">
+                                @Model.Client.Balance.ToString("C")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Client.Notes))
+                {
+                    <div class="mb-3">
+                        <strong>Notes</strong>
+                        <p class="text-muted mb-0">@Model.Client.Notes</p>
+                    </div>
+                }
+
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-page="./Edit"
+                       asp-route-id="@Model.Client.Id"
+                       asp-route-returnUrl="@Url.Page("./Index")"
+                       class="btn btn-outline-primary">
+                        Edit Client
+                    </a>
+
+                    <a href="@(Model.ReturnUrl ?? Url.Page("./Index"))"
+                       class="btn btn-outline-secondary">
+                        Back
+                    </a>
+
+                    <a asp-page="./LinkUser"
+                       asp-route-clientId="@Model.Client.Id"
+                       class="btn btn-outline-success">
+                        Add User
+                    </a>
+
+                    <a asp-page="/OrganizationPages/Projects/Create"
+                       asp-route-clientId="@Model.Client.Id"
+                       asp-route-organizationId="@User.FindFirst("OrganizationId")?.Value"
+                       class="btn btn-success">
+                        Add Project
+                    </a>
+                    <form method="post" asp-page-handler="RecalculateBalance" class="visually-hidden">
+                        <input type="hidden" name="clientId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-warning">
+                            Recalculate Balance
+                        </button>
+                    </form>
+
+                    <a asp-page="/OrganizationPages/Transactions/Payments/Create"
+                       asp-route-clientId ="@Model.Client.Id"
+                    class="btn btn-success">
+                        Add Payment
+                    </a>
+
+                    <a asp-page="/OrganizationPages/Clients/Statement"
+                    asp-route-clientId="@Model.Client.Id"
+                    class="btn btn-success">
+                        Get Statement
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+    
+            var clientReturnUrl = Url.Page("./Details", new { id = Model.Client.Id });
+        
+
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+
+                <div class="px-3 pt-3">
+                    <h5 class="mb-0">Projects</h5>
+                </div>
+
+                <form method="get" class="row g-2 px-3 pt-3 mb-3">
+                    <input type="hidden" name="Id" value="@Model.Id" />
+                    <div class="col-md-6">
+                        <input type="text" name="Search" class="form-control" placeholder="Search projects..."
+                               value="@Model.Search" />
+                    </div>
+                    <div class="col-md-3">
+                        <select asp-for="Status" class="form-select" onchange="this.form.submit()">
+                            <option value="">All Status</option>
+                            <option value="Active"> @ProjectStatus.Active</option>
+                            <option value="Archived">@ProjectStatus.Archived</option>
+                            <option value="Completed">@ProjectStatus.Completed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex">
+                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    </div>
+                </form>
+
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Project</th>
+                            <th class="text-end">Balance</th>
+                            <th class="text-end">Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model.Projects?.Any() ?? false)
+                        {
+                            @foreach (var project in Model.Projects)
+                            {
+                                <tr>
+                                    <td>@project.Name</td>
+                                    <td class="text-end fw-semibold">
+                                        @project.Balance.ToString("C")
+                                    </td>
+                                    <td class="text-end fw-semibold">
+                                        @switch (project.ProjectStatus)
+                                        {
+                                            case ProjectStatus.Active:
+                                                <span class="badge bg-success">Active</span>
+                                                break;
+                                            case ProjectStatus.Completed:
+                                                <span class="badge bg-primary">Completed</span>
+                                                break;
+                                            case ProjectStatus.Archived:
+                                                <span class="badge bg-secondary">Archived</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-page="/OrganizationPages/Projects/Details"
+                                           asp-route-id="@project.Id"
+                                           asp-route-returnUrl="@clientReturnUrl"
+                                           class="btn btn-sm btn-outline-primary me-1">
+                                            View
+                                        </a>
+
+                                        <a asp-page="/OrganizationPages/Projects/Edit"
+                                           asp-route-id="@project.Id"
+                                           asp-route-returnUrl="@clientReturnUrl"
+                                           class="btn btn-sm btn-outline-secondary me-1">
+                                            Edit
+                                        </a>
+
+                                        <form method="post"
+                                              asp-page-handler="ArchiveProject"
+                                              asp-route-projectId="@project.Id"
+                                              asp-route-id="@Model.Client.Id"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Archive this project?');">
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger">
+                                                Archive
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3"
+                                    class="text-center text-muted py-4">
+                                    No projects found for this client.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    }
+</div>

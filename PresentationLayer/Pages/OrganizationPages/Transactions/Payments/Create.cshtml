@@ -1,0 +1,108 @@
+﻿@page
+@model PresentationLayer.Pages.OrganizationPages.Transactions.Payments.CreateModel
+@{
+}
+<div class="container mt-4">
+
+
+
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h4 class="card-title mb-4">Create Client Payment</h4>
+
+            <form method="get" class="row g-2 mb-3">
+                <input type="hidden" name="ClientId" value="@Model.clientId" />
+                <div class="col-md-6">
+                    <input type="text" name="Search" class="form-control" placeholder="Search projects..." value="@Model.Search" />
+                </div>
+                <div class="col-md-3">
+                    <select asp-for="Status" name="Status" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Archived">Archived</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+
+            <form method="post">
+                <input type="hidden" asp-for="clientId" />
+
+                <div class="mb-3">
+                    <label asp-for="TotalAmount" class="form-label">Total Payment Amount</label>
+                    <input asp-for="TotalAmount" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Date" class="form-label">Payment Date</label>
+                    <input asp-for="Date" type="date" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Reference" class="form-label">Reference / Notes</label>
+                    <input asp-for="Reference" class="form-control" />
+                </div>
+
+                <h5 class="mt-4">Allocate to Projects</h5>
+                <p class="text-muted">Select which projects to apply this payment to and enter the allocated amounts.</p>
+  
+
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Select</th>
+                            <th>Project</th>
+                            <th>Project Status</th>
+                            <th class="text-end">Allocated Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Allocations.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="checkbox"
+                                           asp-for="Allocations[i].IsSelected"
+                                           class="form-check-input" />
+                                </td>
+                                <td>@Model.Allocations[i].Name
+                                    <input type="hidden" asp-for="Allocations[i].Name" />
+                                </td>
+
+                                <td>@Model.Allocations[i].status </td>
+                                <td>
+                                    <input asp-for="Allocations[i].Amount" class="form-control text-end" />
+                                    <input type="hidden" asp-for="Allocations[i].ProjectId" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-success">Create Payment</button>
+                    <a asp-page="/OrganizationPages/Clients/Details" asp-route-id="@Model.clientId" class="btn btn-secondary">Cancel</a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>

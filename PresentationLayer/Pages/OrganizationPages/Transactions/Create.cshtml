@@ -1,0 +1,187 @@
+﻿@page "{projectId:guid}"
+@using DomainLayer.Enums
+@model PresentationLayer.Pages.OrganizationPages.Transactions.CreateModel
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+
+                    <h4 class="card-title mb-4">Add Ledger Entry</h4>
+
+                    <form method="post">
+
+                        @if (!ViewData.ModelState.IsValid)
+                            {
+                                <div class="alert alert-danger">
+                                    <ul class="mb-0">
+                                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                        {
+                                            <li>@error.ErrorMessage</li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        
+
+                        <input type="hidden" asp-for="ProjectId" />
+
+                        <div class="mb-3">
+                            <label asp-for="Type" class="form-label"></label>
+                            <select asp-for="Type" class="form-select"
+                                    asp-items="Model.TransactionTypes" onchange="showNecessary(this.value) ">
+                            </select>
+                        </div>
+
+                        <div id="adjustmentSignDiv" class='mb-3 @(Model.Type == TransactionType.Adjustment ? "" : "d-none")'>
+                            <label class="form-label">Adjustment Sign</label>
+                            <select asp-for="IsPositive" class="form-select">
+                                <option value="true">Positive</option>
+                                <option value="false">Negative</option>
+                            </select>
+                        </div>
+
+                        <div id="invoiceLinesDiv" class='@(Model.Type == TransactionType.Invoice ? "" : "d-none")'>
+                            <h5>Invoice Lines</h5>
+                            <div id="invoiceLinesContainer">
+                                @for (int i = 0; i < Model.InvoiceLines.Count; i++)
+                                {
+                                    <div class="mb-2 d-flex gap-2 align-items-end">
+                                        <input asp-for="InvoiceLines[@i].Description" class="form-control" placeholder="Description" />
+                                        <input asp-for="InvoiceLines[@i].Quantity" class="form-control" placeholder="Qty" type="number" step="0.01" />
+                                        <input asp-for="InvoiceLines[@i].UnitPrice" class="form-control" placeholder="Unit Price" type="number" step="0.01" />                                
+                                        <button type="button" class="btn btn-danger" onclick="removeLine(this)">X</button>
+                                    </div>
+                                }
+                            </div>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="addLine()">Add Line</button>
+                        </div>
+
+
+                        <div class='mb-3 @(Model.Type == TransactionType.Invoice ? "d-none" : "")'>
+                            <label asp-for="Amount" class="form-label"></label>
+                            <input asp-for="Amount" class="form-control" />
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Date" class="form-label"></label>
+                            <input asp-for="Date" type="date" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Reference" class="form-label"></label>
+                            <input asp-for="Reference" class="form-control" />
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-page="/OrganizationPages/Projects/Details"
+                               asp-route-id="@Model.ProjectId"
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+
+                            <button type="submit" class="btn btn-primary">
+                                Save Entry
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showNecessary(value) {
+            showAdjustmentSign(value);
+            showInvoiceLines(value);
+        }
+    </script>
+
+    <script> 
+
+    </script>
+
+    <script>
+        function showAdjustmentSign(value) {
+            var el = document.getElementById('adjustmentSignDiv');
+            if (!el) return;
+            // add d-none when not Adjustment, remove when Adjustment
+            if (value === 'Adjustment') {
+                el.classList.remove('d-none');
+            } else {
+                el.classList.add('d-none');
+            }
+        }
+        showAdjustmentSign('@Model.Type');
+    </script>
+
+    <script>
+        function showInvoiceLines(value) {
+            var el = document.getElementById('invoiceLinesDiv');
+            if (!el) return;
+            if (value === 'Invoice') {
+                el.classList.remove('d-none');
+            } else {
+                el.classList.add('d-none');
+            }
+            // Also toggle Amount block (the amount block uses d-none when Invoice)
+            var amountBlock = document.querySelector('.mb-3[asp-for="Amount"], .mb-3');
+            // We will explicitly toggle by selector of label+input isn't reliable; instead toggle by querying the Amount input
+            var amountInput = document.querySelector('input[name="Amount"]');
+            if (amountInput) {
+                var amountBlockEl = amountInput.closest('.mb-3');
+                if (amountBlockEl) {
+                    if (value === 'Invoice') {
+                        amountBlockEl.classList.add('d-none');
+                    } else {
+                        amountBlockEl.classList.remove('d-none');
+                    }
+                }
+            }
+        }
+        showInvoiceLines('@Model.Type');
+
+        var typeSelect = document.querySelector('select[name="Type"]');
+        if (typeSelect) {
+            typeSelect.addEventListener('change', function() {
+                showInvoiceLines(this.value);
+                showAdjustmentSign(this.value);
+            });
+        }
+
+        function addLine() {
+            const container = document.getElementById('invoiceLinesContainer');
+            const index = container.children.length;
+            const div = document.createElement('div');
+            div.className = 'mb-2 d-flex gap-2 align-items-end';
+            div.innerHTML = `
+                <input name="InvoiceLines[${index}].Description" class="form-control" placeholder="Description" />
+                <input name="InvoiceLines[${index}].Quantity" class="form-control" placeholder="Qty" type="number" step="0.01" oninput="updateTotal(this)" />
+                <input name="InvoiceLines[${index}].UnitPrice" class="form-control" placeholder="Unit Price" type="number" step="0.01" oninput="updateTotal(this)" />
+                <button type="button" class="btn btn-danger" onclick="removeLine(this)">X</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeLine(button) {
+            button.parentElement.remove();
+        }
+
+        function updateTotal(input) {
+            const parent = input.parentElement;
+            const qtyEl = parent.querySelector('[placeholder="Qty"]');
+            const priceEl = parent.querySelector('[placeholder="Unit Price"]');
+            const qty = parseFloat(qtyEl ? qtyEl.value : 0) || 0;
+            const price = parseFloat(priceEl ? priceEl.value : 0) || 0;
+            // If you want to display a total per line, add an input with placeholder="Total" in the markup.
+        }
+    </script>
+}

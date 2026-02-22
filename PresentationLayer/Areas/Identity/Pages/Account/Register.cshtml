@@ -1,0 +1,87 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="container vh-100 d-flex align-items-center justify-content-center">
+    <div class="col-md-6 col-lg-5">
+
+        <div class="card shadow border-0">
+            <div class="card-body p-4">
+
+                <h3 class="text-center mb-4">Create Account</h3>
+
+                <form id="registerForm"
+                      asp-route-returnUrl="@Model.ReturnUrl"
+                      method="post">
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3"
+                         role="alert"></div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.FirstName"
+                                       class="form-control"
+                                       placeholder="First name" />
+                                <label asp-for="Input.FirstName">First name</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.LastName"
+                                       class="form-control"
+                                       placeholder="Last name" />
+                                <label asp-for="Input.LastName">Last name</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.Email"
+                               class="form-control"
+                               placeholder="name@example.com" />
+                        <label asp-for="Input.Email">Email</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.Password"
+                               class="form-control"
+                               placeholder="password" />
+                        <label asp-for="Input.Password">Password</label>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <input asp-for="Input.ConfirmPassword"
+                               class="form-control"
+                               placeholder="confirm password" />
+                        <label asp-for="Input.ConfirmPassword">Confirm Password</label>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary w-100 py-2">
+                        Register
+                    </button>
+
+                    <div class="text-center mt-3">
+                        <a asp-page="./Login"
+                           asp-route-returnUrl="@Model.ReturnUrl"
+                           class="small">
+                            Already have an account? Log in
+                        </a>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

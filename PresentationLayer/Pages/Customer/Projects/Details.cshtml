@@ -1,0 +1,202 @@
+﻿@page
+@using DomainLayer.Enums
+@model PresentationLayer.Pages.Customer.Projects.DetailsModel
+@{
+}
+
+<style>
+    .table-fixed {
+        table-layout: fixed;
+        width: 100%;
+        word-wrap: break-word;
+    }
+
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+
+            @if (Model.Project == null)
+            {
+                <div class="alert alert-warning">
+                    Project not found.
+                </div>
+            }
+            else
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="card-title mb-0">@Model.Project.Name</h4>
+                            <span class="badge bg-secondary">
+                                @Model.Project.ProjectStatus
+                            </span>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Project.Description))
+                        {
+                            <p class="text-muted mb-4">
+                                @Model.Project.Description
+                            </p>
+                        }
+
+                        <dl class="row mb-4">
+                            <dt class="col-sm-4">Balance</dt>
+                            <dd class="col-sm-8 fw-semibold">
+                                @Model.Project.Balance.ToString("C", new System.Globalization.CultureInfo("en-US") { NumberFormat = { CurrencyNegativePattern = 1 } })
+                            </dd>
+                        </dl>
+
+                        <div class="d-flex justify-content-between">
+                
+
+                            <a asp-page="/Customer/Projects/Index"
+                               asp-route-id="@Model.Project.clientId" class="btn btn-dark">
+                                Back to Projects
+                            </a>
+
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (Model.Transactions.Items.Any() == true)
+    {
+        <div class="card shadow-sm mt-4">
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Transactions</h5>
+                </div>
+
+                <div class="d-flex mb-3">
+                    <form method="get" class="d-flex mb-3">
+                        <input type="text" class="form-control me-2"
+                               placeholder="Search reference..."
+                               asp-for="SearchQuery" />
+
+                        <select asp-for="SortBy" class="form-select me-2">
+                            <option value="DateDesc">Date ↓</option>
+                            <option value="DateAsc">Date ↑</option>
+                            <option value="AmountDesc">Amount ↓</option>
+                            <option value="AmountAsc">Amount ↑</option>
+                            <option value="TypeAsc">Type ↑</option>
+                            <option value="TypeDesc">Type ↓</option>
+                        </select>
+
+                        <input type="date" class="form-control me-2" asp-for="FromDate" />
+                        <input type="date" class="form-control me-2" asp-for="ToDate" />
+
+                        <input type="number" step="0.01" class="form-control me-2" placeholder="Min amount" asp-for="MinAmount" />
+                        <input type="number" step="0.01" class="form-control me-2" placeholder="Max amount" asp-for="MaxAmount" />
+
+                        <button type="submit" class="btn btn-primary">Apply</button>
+                    </form>
+                </div>
+
+
+                <table class="table table-sm table-striped table-fixed">
+                    <thead>
+                        <tr>
+                            <th style="width:120px;">Date</th>
+                            <th style="width:100px;">Type</th>
+                            <th style="width:300px;">Reference</th>
+                            <th style="width:100px;" class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entry in Model.Transactions.Items)
+                        {
+                            <tr class="@(entry.IsVoided ? "text-muted" : "")">
+                                <td class="text-truncate" style="max-width:120px;">@entry.Date.ToString()</td>
+                                <td class="text-truncate" style="max-width:100px;">@entry.Type</td>
+                                <td class="text-truncate" style="max-width:300px;">@entry.Reference</td>
+                                <td class="text-end" style="max-width:100px;">@entry.Amount.ToString("C", new System.Globalization.CultureInfo("en-US") { NumberFormat = { CurrencyNegativePattern = 1 } })</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                @if (Model.Transactions.TotalCount > Model.PageSize)
+                {
+                    <nav aria-label="Ledger pagination">
+                        <ul class="pagination justify-content-center">
+
+                            <!-- Previous page -->
+                            <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                                <a class="page-link"
+                                   asp-page="./Details"
+                                   asp-route-id="@Model.Id"
+                                   asp-route-PageNumber="@(Model.PageNumber - 1)"
+                                   asp-route-SearchQuery="@Model.SearchQuery"
+                                   asp-route-SortBy="@Model.SortBy"
+                                   asp-route-FromDate="@(Model.FromDate?.ToString("yyyy-MM-dd"))"
+                                   asp-route-ToDate="@(Model.ToDate?.ToString("yyyy-MM-dd"))"
+                                   asp-route-MinAmount="@Model.MinAmount"
+                                   asp-route-MaxAmount="@Model.MaxAmount">
+                                    Previous
+                                </a>
+                            </li>
+
+                            <!-- Page numbers -->
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                                    <a class="page-link"
+                                       asp-page="./Details"
+                                       asp-route-id="@Model.Id"
+                                       asp-route-PageNumber="@i"
+                                       asp-route-SearchQuery="@Model.SearchQuery"
+                                       asp-route-SortBy="@Model.SortBy"
+                                       asp-route-FromDate="@(Model.FromDate?.ToString("yyyy-MM-dd"))"
+                                       asp-route-ToDate="@(Model.ToDate?.ToString("yyyy-MM-dd"))"
+                                       asp-route-MinAmount="@Model.MinAmount"
+                                       asp-route-MaxAmount="@Model.MaxAmount">
+                                        @i
+                                    </a>
+                                </li>
+                            }
+
+                            <!-- Next page -->
+                            <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link"
+                                   asp-page="./Details"
+                                   asp-route-id="@Model.Id"
+                                   asp-route-PageNumber="@(Model.PageNumber + 1)"
+                                   asp-route-SearchQuery="@Model.SearchQuery"
+                                   asp-route-SortBy="@Model.SortBy"
+                                   asp-route-FromDate="@(Model.FromDate?.ToString("yyyy-MM-dd"))"
+                                   asp-route-ToDate="@(Model.ToDate?.ToString("yyyy-MM-dd"))"
+                                   asp-route-MinAmount="@Model.MinAmount"
+                                   asp-route-MaxAmount="@Model.MaxAmount">
+                                    Next
+                                </a>
+                            </li>
+
+                        </ul>
+                    </nav>
+                }
+
+
+            </div>
+        </div>
+    }
+    else
+    {
+
+        <div class="alert alert-info mt-3">
+            No transactions found.
+        </div>
+    }
+
+
+</div>

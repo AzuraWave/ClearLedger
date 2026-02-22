@@ -1,0 +1,18 @@
+﻿
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    
+</head>
+@RenderSection("Scripts", required: false)
+<body>
+    <partial name="_OrgNav" />
+    <div>
+        @RenderBody()
+    </div>
+</body>
+</html>

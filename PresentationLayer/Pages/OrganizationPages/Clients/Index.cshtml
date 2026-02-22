@@ -1,0 +1,103 @@
+﻿@page
+@model PresentationLayer.Pages.OrganizationPages.Clients.IndexModel
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Clients</h4>
+
+        <a asp-page="./Create"
+           class="btn btn-primary">
+            Create Client
+        </a>
+    </div>
+
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <input type="text"
+                       name="searchTerm"
+                       value="@Request.Query["searchTerm"]"
+                       class="form-control"
+                       placeholder="Search clients..." />
+                <button type="submit"
+                        class="btn btn-outline-primary">
+                    Search
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <select asp-for="Status" class="form-select" onchange="this.form.submit()">
+            <option value="">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Archived" >Archived</option>
+            <option value="Completed" >Completed</option>
+        </select>
+        </div>
+    </form>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th class="text-end">Balance</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (!Model.Clients.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">
+                                No clients found.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var client in Model.Clients)
+                        {
+                            <tr>
+                                <td>@client.Name</td>
+                                <td>
+                                    <span class="badge @(client.Status == DomainLayer.Enums.ClientStatus.Active ? "bg-success" : "bg-secondary")">
+                                        @client.Status
+                                    </span>
+                                </td>
+                                <td class="text-end fw-semibold">
+                                    @client.Balance.ToString("C")
+                                </td>
+                                <td class="text-end">
+                                    <a asp-page="./Details"
+                                       asp-route-id="@client.Id"
+                                       asp-route-returnUrl="@Url.Page("./Index")"
+                                       class="btn btn-sm btn-outline-primary me-1">
+                                        View
+                                    </a>
+
+                                    <a asp-page="./Edit"
+                                       asp-route-id="@client.Id"
+                                       asp-route-returnUrl="@Url.Page("./Index")"
+                                       class="btn btn-sm btn-outline-secondary me-1">
+                                        Edit
+                                    </a>
+
+                                    <a asp-page="./Delete"
+                                       asp-route-id="@client.Id"
+                                       class="btn btn-sm btn-outline-danger">
+                                        Archive
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

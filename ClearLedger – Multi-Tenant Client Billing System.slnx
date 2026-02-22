@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.txt" />
+  </Folder>
+  <Project Path="ApplicationLayer.Test/ApplicationLayer.Test.csproj" Id="6dea1e2b-4cf0-497b-a4d9-05192632577f" />
+  <Project Path="ApplicationLayer/ApplicationLayer.csproj" Id="fb5a172c-efa0-47a5-9e6b-7dcbb7ec2495" />
+  <Project Path="DomainLayer.Test/DomainLayer.Test.csproj" Id="3aa8bb86-a342-4e77-a88a-dfe0a6172853" />
+  <Project Path="DomainLayer/DomainLayer.csproj" Id="d3a3670f-332e-43f1-9928-be8220986d97" />
+  <Project Path="InfrastructureLayer.Test/InfrastructureLayer.Test.csproj" Id="7fb3782b-060c-47ba-a2bb-e77e822dd14d" />
+  <Project Path="InfrastructureLayer/InfrastructureLayer.csproj" Id="7a8e88ff-45a8-4a5f-aac7-42e0006eea76" />
+  <Project Path="PresentationLayer/PresentationLayer.csproj" Id="f8df0b3b-e133-4688-a39a-705667776a2e" />
+  <Project Path="PresentationLayerTest/PresentationLayerTest.csproj" Id="cd3b5b39-4184-4fc4-8816-e54f7a35b3c0" />
+</Solution>
