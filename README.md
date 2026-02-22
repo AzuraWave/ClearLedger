@@ -26,14 +26,14 @@ Update-Database
 Or using the .NET CLI:
 
 ```bash
-dotnet ef database update
+dotnet ef database update --project InfrastructureLayer --startup-project PresentationLayer
 ```
 
 #### 3. Seed Development Data
 Run the application with the seed flag:
 
 ```bash
-dotnet run --seed-dev
+dotnet run --seed-dev --project InfrastructureLayer --startup-project PresentationLayer
 ```
 
 This will populate your database with sample data:
@@ -42,7 +42,7 @@ This will populate your database with sample data:
 |------|---------|
 | **Organization** | Demo Company Ltd |
 | **Clients** | Acme Corporation, Tech Startup Inc |
-| **Projects** | 2 sample projects with invoices and payments |
+| **Projects** | 2 Empty sample projects |
 | **API Key** | `dev-api-key-12345` |
 
 ##### Sample User Accounts

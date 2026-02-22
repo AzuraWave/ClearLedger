@@ -88,59 +88,7 @@ namespace PresentationLayer.DbConfiguration
                 CreatedAt = DateTime.UtcNow
             };
 
-            context.Projects.AddRange(project1, project2);
-
-            // Create sample invoices with lines
-            var invoice1 = new Invoice
-            {
-                Id = Guid.NewGuid(),
-                InvoiceNumber = "INV-2024-001",
-                ProjectId = project1.Id,
-                ClientId = client1.Id,
-                OrganizationId = orgId,
-                Date = DateTime.UtcNow.AddDays(-30),
-                TotalAmount = 5000m,
-                Status = DomainLayer.Enums.InvoiceStatus.Issued,
-                CreatedBy = organization.CreatedBy,
-                CreatedAt = DateTime.UtcNow.AddDays(-30)
-            };
-
-            invoice1.Lines = new List<InvoiceLine>
-            {
-                new InvoiceLine
-                {
-                    Id = Guid.NewGuid(),
-                    Description = "UI/UX Design - 40 hours",
-                    Quantity = 40,
-                    UnitPrice = 100m,
-                    InvoiceId = invoice1.Id
-                },
-                new InvoiceLine
-                {
-                    Id = Guid.NewGuid(),
-                    Description = "Frontend Development - 10 hours",
-                    Quantity = 10,
-                    UnitPrice = 100m,
-                    InvoiceId = invoice1.Id
-                }
-            };
-
-            context.Invoices.Add(invoice1);
-
-            // sample payment
-            var payment1 = new ClientPaymentHeader
-            {
-                Id = Guid.NewGuid(),
-                ClientId = client1.Id,
-                OrganizationId = orgId,
-                Date = DateTime.UtcNow.AddDays(-15),
-                TotalAmount = 2500m,
-                Reference = "Payment for Invoice INV-2024-001 (Partial)",
-                CreatedBy = organization.CreatedBy,
-                CreatedAt = DateTime.UtcNow.AddDays(-15)
-            };
-
-            context.ClientPaymentHeaders.Add(payment1);
+            context.Projects.AddRange(project1, project2);  
 
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = services.GetRequiredService<RoleManager<Roles>>();
