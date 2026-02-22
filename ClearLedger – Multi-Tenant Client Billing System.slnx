@@ -1,6 +1,6 @@
 <Solution>
   <Folder Name="/Solution Items/">
-    <File Path="README.txt" />
+    <File Path="README.md" />
   </Folder>
   <Project Path="ApplicationLayer.Test/ApplicationLayer.Test.csproj" Id="6dea1e2b-4cf0-497b-a4d9-05192632577f" />
   <Project Path="ApplicationLayer/ApplicationLayer.csproj" Id="fb5a172c-efa0-47a5-9e6b-7dcbb7ec2495" />
