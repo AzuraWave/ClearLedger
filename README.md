@@ -29,30 +29,6 @@ Or using the .NET CLI:
 dotnet ef database update --project InfrastructureLayer --startup-project PresentationLayer
 ```
 
-#### 3. Seed Development Data
-Run the application with the seed flag:
-
-```bash
-dotnet run --seed-dev --project InfrastructureLayer --startup-project PresentationLayer
-```
-
-This will populate your database with sample data:
-
-| Item | Details |
-|------|---------|
-| **Organization** | Demo Company Ltd |
-| **Clients** | Acme Corporation, Tech Startup Inc |
-| **Projects** | 2 Empty sample projects |
-| **API Key** | `dev-api-key-12345` |
-
-##### Sample User Accounts
-
-| Role | Email | Password | Access |
-|------|-------|----------|--------|
-| Organization Admin | `demo@clearledger.com` | `Demo123!` | Manage all clients & projects |
-| Client 1 | `john.doe@acme.com` | `Customer123!` | View Acme Corporation data |
-| Client 2 | `jane.smith@techstartup.com` | `Customer123!` | View Tech Startup Inc data |
-
 ---
 
 ### Testing the Application
@@ -73,15 +49,14 @@ curl -X GET "https://localhost:5001/api/v1/invoices/{invoice-id}" \
 
 #### Web Application Testing
 1. Navigate to `https://localhost:[port]/Identity/Account/Login`
-2. Login with one of the sample accounts above
+2. Register as organization user
 3. **Organization Admin**: Manage all clients and view all projects
 4. **Client Accounts**: View only your assigned client data
 
 ---
 #### Creating Users 
 
-1- For organization admin, use the seeded account or create a new one via the registration page.
-2- For client users, after you create a client, you can add a user and assign them to that client. This can be done through the admin interface.
+1- For client users, after you create a client, you can add a user and assign them to that client. This can be done through the admin interface.
 
 
 
@@ -96,12 +71,6 @@ Drop-Database
 # Reapply migrations
 Update-Database
 
-# Reseed data
-dotnet run --seed-dev
-```
-
-Or remove the database manually in SQL Server Management Studio and re-run migrations.
-
 ---
 
 ### Troubleshooting
@@ -114,8 +83,3 @@ Or remove the database manually in SQL Server Management Studio and re-run migra
 **Migration Errors:**
 - Delete any pending migrations and start fresh
 - Ensure `LedgerDbContext` is properly configured
-
-**Seeding Not Working:**
-- Confirm application is running in `Development` environment
-- Check `appsettings.Development.json` exists
-- Review console output for error messages

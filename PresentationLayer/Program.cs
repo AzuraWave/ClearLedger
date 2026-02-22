@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
-using PresentationLayer.Commands;
 using PresentationLayer.DbConfiguration;
 using PresentationLayer.Filters;
 using PresentationLayer.Middleware;
@@ -108,7 +107,6 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 
-builder.Services.AddRazorPages();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -159,27 +157,6 @@ if (!builder.Environment.IsEnvironment("Test"))
 
 }
 
-if (app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-    var services = scope.ServiceProvider;
-
-    try
-    {
-        var context = services.GetRequiredService<LedgerDbContext>();
-
-        // Ensure database is created
-        await context.Database.MigrateAsync(); // or EnsureCreated()
-
-        // Seed development data
-        await DevelopmentSeeder.SeedDevelopmentDataAsync(context, scope.ServiceProvider);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
-    }
-}
 
 
 // Configure the HTTP request pipeline.
@@ -231,6 +208,5 @@ app.MapRazorPages()
    .WithStaticAssets();
 app.MapControllers();
 
-await SeedCommand.ExecuteAsync(app, args);
 
 app.Run();
