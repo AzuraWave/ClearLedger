@@ -32,6 +32,10 @@ dotnet ef database update --project InfrastructureLayer --startup-project Presen
 #### 3. Seed Development Data
 After creating the database, seed it with sample data using the seeding command:
 
+```bash
+cd PresentationLayer dotnet run --seed-dev
+```
+
 
 This will create:
 - **Roles**: OrgUser, Customer
