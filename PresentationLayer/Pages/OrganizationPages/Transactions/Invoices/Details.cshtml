@@ -1,0 +1,97 @@
+﻿@page
+@model PresentationLayer.Pages.OrganizationPages.Transactions.Invoices.DetailsModel
+@{
+    ViewData["Title"] = $"Invoice {Model.Invoice?.InvoiceNumber}";
+}
+
+<div class="container mt-5">
+    @if (Model.Invoice == null)
+    {
+        <div class="alert alert-warning">
+            Invoice not found.
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4>@(Model.Organization?.Name ?? "Unknown Organization")</h4>
+                    </div>
+                    <div class="text-end">
+                        <h5>Invoice</h5>
+                        <p class="mb-0"><strong>#@Model.Invoice.InvoiceNumber</strong></p>
+                        <p class="mb-0">Date: @Model.Invoice.Date.ToString("yyyy-MM-dd")</p>
+                        @if (!string.IsNullOrEmpty(Model.Invoice.Reference))
+                        {
+                            <p class="mb-0">Ref: @Model.Invoice.Reference</p>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h6>Bill To:</h6>
+                    <p class="mb-0"><strong>@(Model.Client?.Name ?? "Unknown Client")</strong></p>
+                    @if (!string.IsNullOrEmpty(Model.Client?.Address))
+                    {
+                        <p class="mb-0">@Model.Client.Address</p>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Client?.BillingEmail))
+                    {
+                        <p class="mb-0">Email: @Model.Client.BillingEmail</p>
+                    }
+                </div>
+
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Description</th>
+                                <th class="text-end">Quantity</th>
+                                <th class="text-end">Unit Price</th>
+                                <th class="text-end">Line Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var line in Model.Invoice.Lines)
+                            {
+                                <tr>
+                                    <td>@line.Description</td>
+                                    <td class="text-end">@line.Quantity</td>
+                                    <td class="text-end">@line.UnitPrice.ToString("C")</td>
+                                    <td class="text-end">@line.LineTotal.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <div class="text-end">
+                        <h5>Total: @Model.Invoice.TotalAmount.ToString("C")</h5>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <a asp-page="/OrganizationPages/Projects/Details" class="btn btn-outline-secondary"
+                           asp-route-id="@Model.Invoice.ProjectId">
+                            <i class="bi bi-arrow-left"></i> Back to Transactions
+                        </a>
+                    </div>
+                    <div class="btn-group">
+                        <a asp-page-handler="Print" asp-route-id="@Model.Invoice.Id" class="btn btn-primary">
+                            <i class="bi bi-file-pdf"></i> Print PDF
+                        </a>
+                        <a asp-page-handler="Excel" asp-route-id="@Model.Invoice.Id" class="btn btn-success">
+                            <i class="bi bi-file-excel"></i> Export Excel
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    }
+</div>

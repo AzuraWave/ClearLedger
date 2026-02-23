@@ -146,10 +146,10 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddControllers();
 
-var app = builder.Build();
-
-
+// Configure QuestPDF license before building the app
 QuestPDF.Settings.License = LicenseType.Community;
+
+var app = builder.Build();
 
 // Seeding
 await SeedCommand.ExecuteAsync(app, args);

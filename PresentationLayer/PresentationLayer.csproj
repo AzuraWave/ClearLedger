@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Pages\OrganizationPages\Statements\**" />
+    <Content Remove="Pages\OrganizationPages\Statements\**" />
+    <EmbeddedResource Remove="Pages\OrganizationPages\Statements\**" />
+    <None Remove="Pages\OrganizationPages\Statements\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2">
@@ -29,10 +36,6 @@
   <ItemGroup>
     <ProjectReference Include="..\ApplicationLayer\ApplicationLayer.csproj" />
     <ProjectReference Include="..\InfrastructureLayer\InfrastructureLayer.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Pages\OrganizationPages\Statements\" />
   </ItemGroup>
 
 </Project>

@@ -41,7 +41,7 @@ namespace PresentationLayer.Pages.OrganizationPages.Clients
             var orgId = Guid.Parse(User.FindFirst("OrganizationId")?.Value ?? throw new Exception("OrgId missing"));
             Client = await _clientService.GetClientAsync(Id, orgId);
             if (Client == null) NotFound();
-            var projects = await _projectService.GetProjectsByClientAsync(Id, orgId, false);
+            var projects = await _projectService.GetProjectsByClientAsync(Id, orgId, true);
 
             if (!string.IsNullOrWhiteSpace(Search))
                 projects = projects

@@ -69,6 +69,7 @@ namespace InfrastructureLayer.Repositories
                             ClientId = clientId,
                             Year = year,
                             LastNumber = 1,
+                            RowVersion = new byte[8] // Initialize RowVersion for SQLite compatibility
                         };
                         _db.Add(counter);
                         nextNumber = 1;

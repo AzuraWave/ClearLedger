@@ -5,6 +5,8 @@ using ApplicationLayer.Interfaces.Services;
 using DomainLayer.Entities;
 using Microsoft.Extensions.Logging;
 using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,111 +17,284 @@ namespace InfrastructureLayer.Services
     {
         private readonly ILogger<InvoicePdfGenerator> _logger;
 
+        // Color scheme
+        private static readonly string PrimaryColor = "#2C3E50";
+        private static readonly string AccentColor = "#3498DB";
+        private static readonly string LightGray = "#ECF0F1";
+        private static readonly string DarkGray = "#7F8C8D";
+        private static readonly string SuccessColor = "#27AE60";
+
         public InvoicePdfGenerator(ILogger<InvoicePdfGenerator> logger)
         {
             _logger = logger;
         }
+
         public byte[] Generate(InvoiceReadDto invoice, ClientReadDto client, OrganizationReadDto org)
         {
             _logger.LogInformation(
-            "Generating invoice PDF. InvoiceId {InvoiceId}, ClientId {ClientId}, OrganizationId {OrganizationId}, LineCount {LineCount}",
-            invoice.Id,
-            client.Id,
-            org.Id,
-            invoice.Lines?.Count ?? 0);
+                "Generating invoice PDF. InvoiceId {InvoiceId}, ClientId {ClientId}, OrganizationId {OrganizationId}, LineCount {LineCount}",
+                invoice.Id,
+                client.Id,
+                org.Id,
+                invoice.Lines?.Count ?? 0);
+
             try
             {
                 var pdf = Document.Create(container =>
                 {
                     container.Page(page =>
                     {
-                        page.Margin(40);
+                        page.Margin(50);
+                        page.Size(PageSizes.A4);
 
-                        page.Content().Column(col =>
+                        // Header
+                        page.Header().Column(column =>
                         {
-                            // HEADER
-                            col.Item().Row(row =>
+                            column.Item().Row(row =>
                             {
-                                row.RelativeItem().Column(c =>
+                                // Organization info
+                                row.RelativeItem().Column(col =>
                                 {
-                                    c.Item().Text(org.Name)
-                                        .FontSize(18).SemiBold();
+                                    col.Item().Text(org.Name)
+                                        .FontSize(24)
+                                        .Bold()
+                                        .FontColor(PrimaryColor);
 
-
+                                    col.Item().PaddingTop(10).Text(text =>
+                                    {
+                                        text.Span("From: ").FontSize(10).FontColor(DarkGray);
+                                        text.Span(org.Name).FontSize(10).FontColor(PrimaryColor);
+                                    });
                                 });
 
-                                row.ConstantItem(200).AlignRight().Column(c =>
+                                // Invoice badge
+                                row.ConstantItem(180).Column(col =>
                                 {
-                                    c.Item().Text("INVOICE")
-                                        .FontSize(20).Bold();
-
-                                    c.Item().Text($"Invoice #: {invoice.InvoiceNumber}");
-                                    c.Item().Text($"Date: {invoice.Date:yyyy-MM-dd}");
-
-                                    if (!string.IsNullOrWhiteSpace(invoice.ProjectName))
+                                    col.Item().Background(AccentColor).Padding(15).Column(invoiceInfo =>
                                     {
-                                        c.Item().Text($"Project: {invoice.ProjectName}");
-                                    }
-                                    else
+                                        invoiceInfo.Item().Text("INVOICE")
+                                            .FontSize(20)
+                                            .Bold()
+                                            .FontColor(Colors.White)
+                                            .AlignCenter();
+
+                                        invoiceInfo.Item().PaddingTop(5).Text($"#{invoice.InvoiceNumber}")
+                                            .FontSize(14)
+                                            .Bold()
+                                            .FontColor(Colors.White)
+                                            .AlignCenter();
+                                    });
+
+                                    col.Item().PaddingTop(10).Background(LightGray).Padding(10).Column(dateInfo =>
                                     {
-                                        c.Item().Text(" No project found");
-                                    }
+                                        dateInfo.Item().Text("Date")
+                                            .FontSize(9)
+                                            .FontColor(DarkGray);
+
+                                        dateInfo.Item().Text(invoice.Date.ToString("MMM dd, yyyy"))
+                                            .FontSize(11)
+                                            .Bold()
+                                            .FontColor(PrimaryColor);
+                                    });
                                 });
                             });
 
-                            col.Item().PaddingVertical(15).LineHorizontal(1);
-
-                            // BILL TO
-                            col.Item().Text("Bill To:")
-                                .SemiBold();
-
-                            col.Item().Text(invoice.ClientName);
-                            col.Item().Text(client.Address ?? "No address");
-                            col.Item().Text(client.PhoneNumber ?? "No PhoneNumber");
-
-                            col.Item().PaddingVertical(15).LineHorizontal(1);
-
-                            // LINE ITEMS
-                            col.Item().Table(table =>
+                            // Project info if available
+                            if (!string.IsNullOrWhiteSpace(invoice.ProjectName))
                             {
-                                table.ColumnsDefinition(columns =>
+                                column.Item().PaddingTop(15).Background(LightGray).Padding(12).Row(row =>
                                 {
-                                    columns.RelativeColumn(3);
-                                    columns.RelativeColumn(1);
-                                    columns.RelativeColumn(1);
-                                    columns.RelativeColumn(1);
-                                });
+                                    row.AutoItem().Text("Project: ")
+                                        .FontSize(10)
+                                        .FontColor(DarkGray)
+                                        .SemiBold();
 
-                                // Header
-                                table.Header(header =>
-                                {
-                                    header.Cell().Text("Description").SemiBold();
-                                    header.Cell().AlignRight().Text("Qty").SemiBold();
-                                    header.Cell().AlignRight().Text("Unit").SemiBold();
-                                    header.Cell().AlignRight().Text("Total").SemiBold();
+                                    row.AutoItem().Text(invoice.ProjectName)
+                                        .FontSize(10)
+                                        .FontColor(PrimaryColor)
+                                        .Bold();
                                 });
+                            }
 
-                                foreach (var line in invoice.Lines)
+                            // Reference if available
+                            if (!string.IsNullOrWhiteSpace(invoice.Reference))
+                            {
+                                column.Item().PaddingTop(5).Text(text =>
                                 {
-                                    table.Cell().Text(line.Description);
-                                    table.Cell().AlignRight().Text(line.Quantity.ToString());
-                                    table.Cell().AlignRight().Text(line.UnitPrice.ToString("C"));
-                                    table.Cell().AlignRight().Text(line.LineTotal.ToString("C"));
+                                    text.Span("Reference: ").FontSize(9).FontColor(DarkGray);
+                                    text.Span(invoice.Reference).FontSize(9).FontColor(PrimaryColor).Italic();
+                                });
+                            }
+                        });
+
+                        // Content
+                        page.Content().PaddingTop(30).Column(col =>
+                        {
+                            // Bill To section
+                            col.Item().Background(LightGray).Padding(15).Column(billToCol =>
+                            {
+                                billToCol.Item().Text("BILL TO")
+                                    .FontSize(11)
+                                    .Bold()
+                                    .FontColor(PrimaryColor);
+
+                                billToCol.Item().PaddingTop(8).Text(invoice.ClientName)
+                                    .FontSize(12)
+                                    .Bold()
+                                    .FontColor(PrimaryColor);
+
+                                if (!string.IsNullOrWhiteSpace(client.Address))
+                                {
+                                    billToCol.Item().PaddingTop(3).Text(client.Address)
+                                        .FontSize(10)
+                                        .FontColor(DarkGray);
+                                }
+
+                                if (!string.IsNullOrWhiteSpace(client.PhoneNumber))
+                                {
+                                    billToCol.Item().PaddingTop(2).Text($"Phone: {client.PhoneNumber}")
+                                        .FontSize(10)
+                                        .FontColor(DarkGray);
+                                }
+
+                                if (!string.IsNullOrWhiteSpace(client.BillingEmail))
+                                {
+                                    billToCol.Item().PaddingTop(2).Text($"Email: {client.BillingEmail}")
+                                        .FontSize(10)
+                                        .FontColor(DarkGray);
                                 }
                             });
 
-                            col.Item().PaddingVertical(15).LineHorizontal(1);
+                            // Line items title
+                            col.Item().PaddingTop(30).Text("Invoice Items")
+                                .FontSize(14)
+                                .FontColor(PrimaryColor)
+                                .SemiBold();
 
-                            // TOTAL
-                            col.Item().AlignRight().Text($"Total: {invoice.TotalAmount:C}")
-                                .FontSize(14).Bold();
+                            // Line items table
+                            col.Item().PaddingTop(10).Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.RelativeColumn(4);      // Description
+                                    columns.ConstantColumn(80);     // Qty
+                                    columns.ConstantColumn(90);     // Unit Price
+                                    columns.ConstantColumn(100);    // Total
+                                });
+
+                                // Table header
+                                table.Header(header =>
+                                {
+                                    header.Cell().Background(PrimaryColor).Padding(10)
+                                        .Text("Description").FontSize(10).Bold().FontColor(Colors.White);
+
+                                    header.Cell().Background(PrimaryColor).Padding(10)
+                                        .AlignRight().Text("Quantity").FontSize(10).Bold().FontColor(Colors.White);
+
+                                    header.Cell().Background(PrimaryColor).Padding(10)
+                                        .AlignRight().Text("Unit Price").FontSize(10).Bold().FontColor(Colors.White);
+
+                                    header.Cell().Background(PrimaryColor).Padding(10)
+                                        .AlignRight().Text("Line Total").FontSize(10).Bold().FontColor(Colors.White);
+                                });
+
+                                // Line items
+                                int rowIndex = 0;
+                                foreach (var line in invoice.Lines)
+                                {
+                                    var bgColor = rowIndex % 2 == 0 ? Colors.White.ToString() : LightGray;
+                                    rowIndex++;
+
+                                    table.Cell().Background(bgColor).Padding(10)
+                                        .Text(line.Description).FontSize(10);
+
+                                    table.Cell().Background(bgColor).Padding(10)
+                                        .AlignRight().Text(line.Quantity.ToString("N2")).FontSize(10);
+
+                                    table.Cell().Background(bgColor).Padding(10)
+                                        .AlignRight().Text(line.UnitPrice.ToString("C")).FontSize(10);
+
+                                    table.Cell().Background(bgColor).Padding(10)
+                                        .AlignRight().Text(line.LineTotal.ToString("C")).FontSize(10).SemiBold();
+                                }
+
+                                // Subtotal row
+                                table.Cell().ColumnSpan(3).Background(LightGray).Padding(10)
+                                    .AlignRight()
+                                    .Text("Subtotal")
+                                    .FontSize(11)
+                                    .SemiBold()
+                                    .FontColor(PrimaryColor);
+
+                                table.Cell().Background(LightGray).Padding(10)
+                                    .AlignRight()
+                                    .Text(invoice.TotalAmount.ToString("C"))
+                                    .FontSize(11)
+                                    .SemiBold()
+                                    .FontColor(PrimaryColor);
+
+                                // Total row (highlighted)
+                                table.Cell().ColumnSpan(3).Background(SuccessColor).Padding(12)
+                                    .AlignRight()
+                                    .Text("TOTAL DUE")
+                                    .FontSize(12)
+                                    .Bold()
+                                    .FontColor(Colors.White);
+
+                                table.Cell().Background(SuccessColor).Padding(12)
+                                    .AlignRight()
+                                    .Text(invoice.TotalAmount.ToString("C"))
+                                    .FontSize(14)
+                                    .Bold()
+                                    .FontColor(Colors.White);
+                            });
+
+                            // Payment terms or note
+                            col.Item().PaddingTop(30).Background(LightGray).Padding(15).Column(noteCol =>
+                            {
+                                noteCol.Item().Text("Payment Terms")
+                                    .FontSize(10)
+                                    .FontColor(DarkGray)
+                                    .SemiBold();
+
+                                noteCol.Item().PaddingTop(5).Text("Please remit payment within 30 days of invoice date.")
+                                    .FontSize(9)
+                                    .FontColor(DarkGray);
+                            });
+                        });
+
+                        // Footer
+                        page.Footer().Column(column =>
+                        {
+                            column.Item().BorderTop(1).BorderColor(DarkGray).PaddingTop(10);
+
+                            column.Item().Row(row =>
+                            {
+                                row.RelativeItem().Text($"Generated on {DateTime.Now:MMM dd, yyyy 'at' hh:mm tt}")
+                                    .FontSize(8)
+                                    .FontColor(DarkGray);
+
+                                row.RelativeItem().AlignCenter().Text("Thank you for your business!")
+                                    .FontSize(9)
+                                    .FontColor(PrimaryColor)
+                                    .Italic();
+
+                                row.RelativeItem().AlignRight().Text(text =>
+                                {
+                                    text.Span("Page ").FontSize(8).FontColor(DarkGray);
+                                    text.CurrentPageNumber().FontSize(8).FontColor(DarkGray);
+                                    text.Span(" of ").FontSize(8).FontColor(DarkGray);
+                                    text.TotalPages().FontSize(8).FontColor(DarkGray);
+                                });
+                            });
                         });
                     });
                 }).GeneratePdf();
+
                 _logger.LogInformation(
-                "Invoice PDF generated successfully. InvoiceId {InvoiceId}, Size {SizeBytes} bytes",
-                invoice.Id,
-                pdf.Length);
+                    "Invoice PDF generated successfully. InvoiceId {InvoiceId}, Size {SizeBytes} bytes",
+                    invoice.Id,
+                    pdf.Length);
 
                 return pdf;
             }

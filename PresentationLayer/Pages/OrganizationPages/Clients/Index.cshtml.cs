@@ -29,7 +29,7 @@ namespace PresentationLayer.Pages.OrganizationPages.Clients
         {
             var orgId = Guid.Parse(User.FindFirst("OrganizationId")?.Value ?? throw new Exception("OrgId missing"));
 
-            var clients = await _clientService.GetClientsByOrganizationAsync(orgId);
+            var clients = await _clientService.GetClientsByOrganizationAsync(orgId, true);
 
             // In-memory filtering by search term
             if (!string.IsNullOrWhiteSpace(searchTerm))

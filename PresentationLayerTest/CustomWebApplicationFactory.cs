@@ -29,7 +29,10 @@ namespace PresentationLayerTest
 {
     public class CustomWebApplicationFactory : WebApplicationFactory<Program>  
     {
-        
+        private bool _isInitialized = false;
+        private readonly object _lock = new object();
+        private DbConnection _connection;
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("Test");
@@ -42,11 +45,13 @@ namespace PresentationLayerTest
 
                 services.RemoveAll(typeof(DbContextOptions<LedgerDbContext>));
 
-                string connectionString = "Server=(localdb)\\mssqllocaldb;Database=LedgerTestDb;Trusted_Connection=True;MultipleActiveResultSets=true";
+                // Use SQLite in-memory database for tests
+                _connection = new SqliteConnection("DataSource=:memory:");
+                _connection.Open();
 
                 services.AddDbContext<LedgerDbContext>(options =>
                 {
-                    options.UseSqlServer(connectionString);
+                    options.UseSqlite(_connection);
                 });
 
                 services.AddIdentity<ApplicationUser, Roles>(options =>
@@ -57,18 +62,54 @@ namespace PresentationLayerTest
 
                 services.AddSingleton<IEmailSender, NoOpEmailSender>();
 
-
-                var sp = services.BuildServiceProvider();
-                using var scope = sp.CreateScope();
-                var db = scope.ServiceProvider.GetRequiredService<LedgerDbContext>();
-                db.Database.EnsureDeleted();
-                db.Database.EnsureCreated();
-                Seeding.InitializeTestDB(db);
+                // Initialize the database only once
+                if (!_isInitialized)
+                {
+                    lock (_lock)
+                    {
+                        if (!_isInitialized)
+                        {
+                            var sp = services.BuildServiceProvider();
+                            using var scope = sp.CreateScope();
+                            var db = scope.ServiceProvider.GetRequiredService<LedgerDbContext>();
+                           try
+                           {
+                               // Create the schema for the in-memory database
+                               db.Database.EnsureCreated();
+                               Seeding.InitializeTestDB(db);
+                               _isInitialized = true;
+                           }
+                           catch
+                           {
+                               // If initialization fails, ensure we can retry
+                               _isInitialized = false;
+                               throw;
+                           }
+                        }
+                    }
+                }
             });
 
-           
 
 
+
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                try
+                {
+                    _connection?.Close();
+                    _connection?.Dispose();
+                }
+                catch
+                {
+                    // Ignore errors during cleanup
+                }
+            }
+            base.Dispose(disposing);
         }
     }
 

@@ -153,6 +153,12 @@
                                 <td class="text-truncate" style="max-width:300px;">@entry.Reference</td>
                                 <td class="text-end" style="max-width:100px;">@entry.Amount.ToString("C", new System.Globalization.CultureInfo("en-US") { NumberFormat = { CurrencyNegativePattern = 1 } })</td>
                                 <td class="text-end" style="max-width:120px;">
+                                    @if ((entry.Type == DomainLayer.Enums.TransactionType.Invoice))
+                                    {
+
+                                        <a asp-page="../Transactions/Invoices/Details" asp-route-id="@entry.Id" class="btn btn-sm btn-outline-primary">View</a>
+                                    }
+                                    
                                     @if (!entry.IsVoided && (entry.Type == TransactionType.Invoice || entry.Type == TransactionType.Payment))
                                     {
                                         <form method="post" asp-page-handler="Void" class="d-inline">
@@ -165,6 +171,9 @@
                                             </button>
                                         </form>
                                     }
+                                   
+                                    
+
                                 </td>
                             </tr>
                         }

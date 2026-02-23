@@ -32,8 +32,8 @@ namespace PresentationLayer.Pages.Customer
         public string ClientName { get; set; } = "Example Client";
 
         public decimal CurrentBalance { get; set; } = 1250.00m;
-        public decimal TotalPaid { get; set; } = 5000.00m;
-        public decimal TotalInvoiced { get; set; } = 6000.00m;
+        public decimal TotalPaid { get; set; } = 0m;
+        public decimal TotalInvoiced { get; set; } = 0m;
         public int TotalProjects { get; set; } = 0;
 
         public PagedResult<TransactionDto> RecentTransactions { get; set; } =
@@ -46,7 +46,7 @@ namespace PresentationLayer.Pages.Customer
                 var orgId = Guid.Parse(User.FindFirst("OrganizationId")?.Value ?? throw new Exception("OrgId missing"));
                 var clientId = Guid.Parse(User.FindFirst("ClientId")?.Value ?? throw new Exception("ClientId missing"));
 
-                var client = await _clientService.GetClientAsync(clientId, orgId, false);
+                var client = await _clientService.GetClientAsync(clientId, orgId, true);
 
                 var info = await _transactionService.GetClientOverviewAsync(orgId, clientId);
 

@@ -88,8 +88,7 @@ namespace PresentationLayerTest
                     Id = CLIENT_ID,
                     Name = CLIENT_NAME,
                     Address = Address,
-                    OrganizationId = ORG_ID,
-                    Organization = GetOrganization()
+                    OrganizationId = ORG_ID
                 };
             }
             return client;
@@ -103,9 +102,7 @@ namespace PresentationLayerTest
                     Id = PROJECT_ID,
                     Name = "Project 1",
                     ClientId = CLIENT_ID,
-                    Client = GetClient(),
-                    OrganizationId = ORG_ID,
-                    Organization = GetOrganization()
+                    OrganizationId = ORG_ID
                 };
             return project;
         }
@@ -124,11 +121,8 @@ namespace PresentationLayerTest
             {
                 Id = INVOICE_ID,
                 OrganizationId = org.Id,
-                Organization = org,
                 ClientId = client.Id,
-                Client = client,
                 ProjectId = project.Id,
-                Project = project,
                 InvoiceNumber = "INV-001",
                 Status = InvoiceStatus.Issued,
                 Date = DateTime.UtcNow.AddDays(-10),
@@ -144,9 +138,7 @@ namespace PresentationLayerTest
             {
                 Id = PAYMENT_ID,
                 OrganizationId = org.Id,
-                Organization = org,
                 ClientId = client.Id,
-                Client = client,
                 Date = DateTime.UtcNow.AddDays(-5),
                 TotalAmount = 1000,
                 Reference = "PAY-001",
@@ -168,11 +160,8 @@ namespace PresentationLayerTest
             {
                 Id = DISCOUNT_ID,
                 OrganizationId = org.Id,
-                Organization = org,
                 ClientId = client.Id,
-                Client = client,
                 ProjectId = project.Id,
-                Project = project,
                 Amount = 100,
                 Date = DateTime.UtcNow.AddDays(-9),
                 Reason = "Loyalty discount"
@@ -185,11 +174,8 @@ namespace PresentationLayerTest
             {
                 Id = ADJUSTMENT_ID,
                 OrganizationId = org.Id,
-                Organization = org,
                 ClientId = client.Id,
-                Client = client,
                 ProjectId = project.Id,
-                Project = project,
                 Amount = 50,
                 Date = DateTime.UtcNow.AddDays(-8),
                 Reason = "Manual correction",
