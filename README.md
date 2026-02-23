@@ -81,10 +81,6 @@ https://localhost:[port]/swagger
 curl -X GET "https://localhost:5001/api/v1/invoices/{invoice-id}" \
      -H "X-API-KEY: ApiKey dev-api-key-12345"
 ```
-
-**Get Organization ID:**
-The organization ID is displayed in the console output when you run `--seed-dev`. You'll need it for API requests.
-
 ---
 
 #### Creating Additional Users 
