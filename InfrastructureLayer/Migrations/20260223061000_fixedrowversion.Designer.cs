@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InfrastructureLayer.Migrations
 {
     [DbContext(typeof(LedgerDbContext))]
-    [Migration("20260223044932_fixedTestingIssue")]
-    partial class fixedTestingIssue
+    [Migration("20260223061000_fixedrowversion")]
+    partial class fixedrowversion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -351,11 +351,6 @@ namespace InfrastructureLayer.Migrations
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
 
                     b.Property<int>("Year")
                         .HasColumnType("int");

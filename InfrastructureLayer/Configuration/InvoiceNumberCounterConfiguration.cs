@@ -14,13 +14,6 @@ namespace InfrastructureLayer.Configuration
             builder.HasIndex(x => new { x.OrganizationId, x.ClientId, x.Year })
                 .IsUnique();
 
-            // Configure RowVersion - for concurrency control
-            // For SQLite compatibility, we don't use ValueGeneratedOnAddOrUpdate
-            // The application code must set this value explicitly
-            builder.Property(x => x.RowVersion)
-                .IsConcurrencyToken()
-                .IsRequired();
-
             builder.HasOne(x => x.Organization)
            .WithMany(x => x.invoiceNumberCounters)
            .HasForeignKey(x => x.OrganizationId)
