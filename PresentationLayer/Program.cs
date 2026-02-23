@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
+using PresentationLayer.Commands;
 using PresentationLayer.DbConfiguration;
 using PresentationLayer.Filters;
 using PresentationLayer.Middleware;
@@ -145,9 +146,11 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+
 QuestPDF.Settings.License = LicenseType.Community;
 
 // Seeding
+await SeedCommand.ExecuteAsync(app, args);
 
 if (!builder.Environment.IsEnvironment("Test"))
 {

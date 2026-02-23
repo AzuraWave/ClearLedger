@@ -15,7 +15,7 @@ namespace InfrastructureLayer.Configuration
         {
             builder
             .Property(u => u.OrganizationId)
-            .IsRequired();
+            .IsRequired(false);
 
             builder
             .HasIndex(u => u.NormalizedUserName)
