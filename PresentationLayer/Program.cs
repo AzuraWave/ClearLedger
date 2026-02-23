@@ -59,7 +59,9 @@ if (!isTest)
     {
         options.SignIn.RequireConfirmedAccount = false;
     }).AddEntityFrameworkStores<LedgerDbContext>()
-        .AddDefaultTokenProviders();
+        .AddDefaultTokenProviders()
+        .AddDefaultUI()
+        .AddClaimsPrincipalFactory<ApplicationUserClaimsPrincipalFactory>();
 
     builder.Services.AddSingleton<IEmailSender, NoOpEmailSender>();
 }

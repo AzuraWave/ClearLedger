@@ -130,8 +130,6 @@ namespace PresentationLayer.Areas.Identity.Pages.Account
                     _logger.LogInformation("Login successful for Email {Email}", Input.Email);
                     var user = await _userManager.FindByEmailAsync(Input.Email);
 
-                    await SynchronizeUserClaimsAsync(user);
-
                     if (await _userManager.IsInRoleAsync(user, "OrgUser"))
                     {
                         _logger.LogInformation("User {Email} logged in as OrgUser", Input.Email);
@@ -176,53 +174,6 @@ namespace PresentationLayer.Areas.Identity.Pages.Account
 
             // If we got this far, something failed, redisplay form
             return Page();
-        }
-
-        private async Task SynchronizeUserClaimsAsync(ApplicationUser user)
-        {
-            var claims = await _userManager.GetClaimsAsync(user);
-            var claimsAdded = false;
-
-            // Sync OrganizationId claim for OrgUser and Customer roles
-            if (user.OrganizationId.HasValue && !claims.Any(c => c.Type == "OrganizationId"))
-            {
-                var addClaimResult = await _userManager.AddClaimAsync(user, new Claim("OrganizationId", user.OrganizationId.ToString()));
-                if (addClaimResult.Succeeded)
-                {
-                    _logger.LogInformation("Added missing OrganizationId claim for user {Email}", user.Email);
-                    claimsAdded = true;
-                }
-                else
-                {
-                    _logger.LogError("Failed to add OrganizationId claim for user {Email}: {Errors}",
-                        user.Email, string.Join(", ", addClaimResult.Errors.Select(e => e.Description)));
-                }
-            }
-
-            // Sync ClientId claim for Customer role
-            if (user.ClientId.HasValue && !claims.Any(c => c.Type == "ClientId"))
-            {
-                var addClaimResult = await _userManager.AddClaimAsync(user, new Claim("ClientId", user.ClientId.ToString()));
-                if (addClaimResult.Succeeded)
-                {
-                    _logger.LogInformation("Added missing ClientId claim for user {Email}", user.Email);
-                    claimsAdded = true;
-                }
-                else
-                {
-                    _logger.LogError("Failed to add ClientId claim for user {Email}: {Errors}",
-                        user.Email, string.Join(", ", addClaimResult.Errors.Select(e => e.Description)));
-                }
-
-
-            }
-
-            // Refresh sign-in if any claims were added
-            if (claimsAdded)
-            {
-                await _signInManager.RefreshSignInAsync(user);
-                _logger.LogInformation("Refreshed sign-in for user {Email} after adding claims", user.Email);
-            }
         }
     }
 }

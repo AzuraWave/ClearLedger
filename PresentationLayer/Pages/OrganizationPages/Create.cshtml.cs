@@ -67,12 +67,7 @@ namespace PresentationLayer.Pages.OrganizationPages
             user.OrganizationId = org.Id;
             await _userManager.UpdateAsync(user);
 
-            // Persist OrganizationId as a claim and refresh sign-in so cookie contains it
-            var claims = await _userManager.GetClaimsAsync(user);
-            if (!claims.Any(c => c.Type == "OrganizationId"))
-            {
-                await _userManager.AddClaimAsync(user, new Claim("OrganizationId", org.Id.ToString()));
-            }
+            // Refresh sign-in to update the authentication cookie with the new OrganizationId claim
             await _signInManager.RefreshSignInAsync(user);
 
             return RedirectToPage("/OrganizationPages/Dashboard/Index");

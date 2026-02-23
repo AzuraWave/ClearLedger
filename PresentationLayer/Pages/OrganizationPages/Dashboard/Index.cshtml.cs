@@ -1,11 +1,14 @@
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using ApplicationLayer.DTOs.Query;
 using ApplicationLayer.DTOs.Transactions;
 using ApplicationLayer.DTOs.Transactions.Query;
 using ApplicationLayer.Interfaces.Services;
+using InfrastructureLayer.Identity.User;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -18,17 +21,23 @@ namespace PresentationLayer.Pages.OrganizationPages.Dashboard
         private readonly IProjectService _projectService;
         private readonly IOrganizationService _organizationService;
         private readonly ITransactionService _transactionService;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
         public IndexModel(
             IClientService clientService,
             IProjectService projectService,
             ITransactionService transactionService,
-            IOrganizationService organizationService)
+            IOrganizationService organizationService,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager)
         {
             _clientService = clientService;
             _projectService = projectService;
             _transactionService = transactionService;
             _organizationService = organizationService;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public int TotalClients { get; set; }
@@ -43,9 +52,27 @@ namespace PresentationLayer.Pages.OrganizationPages.Dashboard
 
         public async Task OnGetAsync()
         {
-            var orgId = Guid.Parse(User.FindFirst("OrganizationId")?.Value ?? throw new Exception("OrgId missing"));
+            var orgIdClaim = User.FindFirst("OrganizationId")?.Value;
+            
+            // If the claim is missing, try to get it from the database and refresh the sign-in
+            if (string.IsNullOrEmpty(orgIdClaim))
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user?.OrganizationId == null)
+                {
+                    // User has no organization, redirect to create page
+                    Response.Redirect("/OrganizationPages/Create");
+                    return;
+                }
 
+                // Refresh the sign-in to update the authentication cookie with claims
+                await _signInManager.RefreshSignInAsync(user);
+                
+                // Use the organization ID from the database
+                orgIdClaim = user.OrganizationId.ToString();
+            }
 
+            var orgId = Guid.Parse(orgIdClaim);
 
             TotalClients = await _clientService.GetClientsTotal(orgId);
             TotalProjects = await _projectService.GetProjectsTotal(orgId);
